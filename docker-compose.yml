@@ -1,0 +1,112 @@
+﻿services:
+  
+  # APIs
+  
+  bh-account-api:
+    image: bh-account-api
+    build:
+      context: .
+      dockerfile: src/Account/Account.API/Dockerfile
+    ports:
+      - "3201:80"
+    networks:
+      - bh-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3201/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  bh-transaction-api:
+    image: bh-transaction-api
+    build:
+      context: .
+      dockerfile: src/Transaction/Transaction.API/Dockerfile
+    ports:
+      - "3205:80"
+    networks:
+      - bh-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3205/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  bh-user-api:
+    image: bh-user-api
+    build:
+      context: .
+      dockerfile: src/User/User.API/Dockerfile
+    ports:
+      - "3203:80"
+    networks:
+      - bh-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3203/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  bh-web-bff-api:
+    image: bh-web-bff-api
+    build:
+      context: .
+      dockerfile: src/BFF/Web.BFF.API/Dockerfile
+    ports:
+      - "3298:80"
+    depends_on:
+      - bh-account-api
+      - bh-transaction-api
+      - bh-user-api
+    networks:
+      - bh-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3298/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Tools
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - bh-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.15
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    volumes:
+      - kibana_data:/usr/share/kibana/data
+    networks:
+      - bh-network
+
+volumes:
+  elasticsearch_data:
+  kibana_data:
+    
+networks:
+  bh-network:
+    driver: bridge
