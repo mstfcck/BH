@@ -84,6 +84,7 @@ There is a simple data in the memory for test case:
 **To create a new account via the BFF API, a request can be made as follows:**
 
 **End Point:** POST /api/accounts
+
 **Request Body:**
 
 ```json
