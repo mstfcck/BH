@@ -100,6 +100,7 @@ There is a simple data in the memory for test case:
 **To retrieve the accounts and transactions of a user (customer) via the BFF API, a request can be made as follows.**
 
 **End Point:** GET /api/users/{userId}
+
 **Request Body:**
 
 Change the **{userId}** with: 1000001
